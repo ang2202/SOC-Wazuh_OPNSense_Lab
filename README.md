@@ -60,7 +60,7 @@ Este es el decodificador "padre". Su único trabajo es vigilar todos los logs qu
 
 En lugar de usar una sola expresión regular gigante para leer toda la línea del log (lo que consumiría demasiada CPU en el servidor), el trabajo se divide en tres decodificadores hijos que van leyendo el log por tramos, como una cadena de montaje:
 
- * **Fase A - Datos del Firewall (offset="after_parent"): Empieza a leer justo donde terminó el decodificador padre. Va contando las comas del log de OPNsense y extrae tres datos básicos: la ID de la regla interna, el nombre de la interfaz de red (ifname) y si el paquete se ha bloqueado o aceptado (action).
+ * **Fase A - Datos del Firewall (offset="after_parent"): Empieza a leer justo donde terminó el decodificador padre. Va contando las comas del log de OPNsense y extrae tres datos básicos: la ID de la regla interna, el nombre de la interfaz de red   (ifname) y si el paquete se ha bloqueado o aceptado (action).
 
  * **   Fase B - Direcciones IP y Protocolo (offset="after_regex"): Sigue leyendo desde donde se quedó el paso anterior. Salta los datos que no nos importan y guarda las variables clave: si el tráfico es entrante o saliente (direction), el protocolo (protocol), la IP de origen (srcip) y la IP de destino (dstip).
 
@@ -124,6 +124,9 @@ sudo nmap -T5 -p- --open 192.168.1.140
 
 ```
 Se adjunta la evidencia de la ejecución del comando ofensivo en la terminal del atacante:
+
+![comando ofensivo] (nmap_1_kali.png)
+
 
 ## 2. Qué pasa dentro de Wazuh cuando llega el ataque
 
