@@ -1,16 +1,16 @@
-# 🛡️ SOC-Wazuh_OPNsense_Lab
+#  SOC-Wazuh_OPNsense_Lab
 
 Despliegue de un entorno SIEM/SOC (Wazuh + Docker) con monitorización perimetral (OPNsense) en Proxmox VE. Incluye ruleset personalizado mapeado con el framework MITRE ATT&CK (T1110).
 
 ---
 
-## 🗺️ Arquitectura de Red y Topología de la Infraestructura
+##  Arquitectura de Red y Topología de la Infraestructura
 
 Para garantizar un aislamiento estricto y un control absoluto sobre el tráfico auditado, el entorno se ha consolidado sobre el hipervisor **Proxmox VE**, estructurando un flujo de tráfico vertical donde la seguridad perimetral controla las comunicaciones.
 
 ![Arquitectura del Laboratorio](arquitectura_red_SOC.drawio.png)
 
-### 🖥️ Desglose de Componentes y Direccionamiento
+###  Desglose de Componentes y Direccionamiento
 
 * **Puente Virtual `vmbr0` (Segmento WAN / Red Doméstica):** Vincula el entorno virtualizado con la red física (Subred `192.168.1.0/24`). La interfaz `WAN (vtnet0)` de OPNsense toma la IP **`192.168.1.140`** en este segmento.
 * **Cortafuegos Perimetral (OPNsense 26.1):** Actúa como Gateway y frontera de seguridad. Aplica políticas de denegación por defecto (*Default Drop Rule*) e implementa el reenvío de logs vía Syslog. Su interfaz `LAN (vtnet1)` es la puerta de enlace segura: **`10.0.10.1`**.
@@ -52,25 +52,25 @@ Debido a que los logs crudos del daemon `filterlog` de OPNsense viajan en format
 
 Este es el decodificador "padre". Su único trabajo es vigilar todos los logs que entran a Wazuh y cazar únicamente los que vienen del cortafuegos OPNsense:
 
-  * **Filtro de entrada (<prematch>): Busca que el log empiece exactamente con la estructura nativa del firewall (filterlog \d+ - [meta sequenceId="\d+"] ).
+* **Filtro de entrada (<prematch>):** Busca que el log empiece exactamente con la estructura nativa del firewall (filterlog \d+ - [meta sequenceId="\d+"] ).
 
-    Utilidad: Si el log no tiene esa cabecera, Wazuh pasa de él y no gasta tiempo procesándolo. Si coincide, le da el visto bueno y se lo pasa a los decodificadores hijos para que lo troceen.
+* **Utilidad:** Si el log no tiene esa cabecera, Wazuh pasa de él y no gasta tiempo procesándolo. Si coincide, le da el visto bueno y se lo pasa a los decodificadores hijos para que lo troceen.
 
 ## 3. Extracción de datos por fases (offsets)
 
 En lugar de usar una sola expresión regular gigante para leer toda la línea del log (lo que consumiría demasiada CPU en el servidor), el trabajo se divide en tres decodificadores hijos que van leyendo el log por tramos, como una cadena de montaje:
 
- * **Fase A - Datos del Firewall (offset="after_parent"): Empieza a leer justo donde terminó el decodificador padre. Va contando las comas del log de OPNsense y extrae tres datos básicos: la ID de la regla interna, el nombre de la interfaz de red   (ifname) y si el paquete se ha bloqueado o aceptado (action).
+ * **Fase A - Datos del Firewall (offset="after_parent"):** Empieza a leer justo donde terminó el decodificador padre. Va contando las comas del log de OPNsense y extrae tres datos básicos: la ID de la regla interna, el nombre de la interfaz de red   (ifname) y si el paquete se ha bloqueado o aceptado (action).
 
- * **   Fase B - Direcciones IP y Protocolo (offset="after_regex"): Sigue leyendo desde donde se quedó el paso anterior. Salta los datos que no nos importan y guarda las variables clave: si el tráfico es entrante o saliente (direction), el protocolo (protocol), la IP de origen (srcip) y la IP de destino (dstip).
+ * **Fase B - Direcciones IP y Protocolo (offset="after_regex"):**  Sigue leyendo desde donde se quedó el paso anterior. Salta los datos que no nos importan y guarda las variables clave: si el tráfico es entrante o saliente (direction), el protocolo (protocol), la IP de origen (srcip) y la IP de destino (dstip).
 
- * **  Fase C - Puertos de conexión (offset="after_regex"): Va al tramo final del log y busca caracteres numéricos para sacar los puertos exactos de origen (srcport) y destino (dstport). Estos datos son los que luego nos permiten pintar las gráficas en el panel.
+ * **Fase C - Puertos de conexión (offset="after_regex"):** Va al tramo final del log y busca caracteres numéricos para sacar los puertos exactos de origen (srcport) y destino (dstport). Estos datos son los que luego nos permiten pintar las gráficas en el panel.
 
 ## 4. Rules (local_rules.xml)
 
 ## Nota de Optimización de Rendimiento:
-  * ** Se ha implementado un árbol de decisión jerárquico de tres niveles para optimizar el rendimiento de la base de datos y proteger el almacenamiento del servidor.
-  * ** Mediante el uso estratégico de la directiva <options>no_log</options> en la regla intermedia (100001), se evita que miles de alertas individuales de nivel 5 saturen el disco de forma innecesaria. El motor procesa estos eventos estrictamente en memoria para la lógica de ráfagas, reservando el almacenamiento físico y la representación visual en el Dashboard de Threat Hunting de forma exclusiva para los escenarios de alerta correlacionada de nivel crítico (Nivel 10), correspondientes a ataques de reconocimiento activos.
+  * **Se ha implementado un árbol de decisión jerárquico de tres niveles para optimizar el rendimiento de la base de datos y proteger el almacenamiento del servidor.**
+  * **Mediante el uso estratégico de la directiva <options>no_log</options> en la regla intermedia (100001), se evita que miles de alertas individuales de nivel 5 saturen el disco de forma innecesaria. El motor procesa estos eventos estrictamente en memoria para la lógica de ráfagas, reservando el almacenamiento físico y la representación visual en el Dashboard de Threat Hunting de forma exclusiva para los escenarios de alerta correlacionada de nivel crítico (Nivel 10), correspondientes a ataques de reconocimiento activos.**
 
 ```xml
 <group name="opnsense-filter,">
@@ -103,19 +103,19 @@ En lugar de usar una sola expresión regular gigante para leer toda la línea de
 
 Esta regla es la que tiene la lógica inteligente para detectar el ataque y evitar que el Dashboard se sature de notificaciones repetidas:
 
-  * ** Vigilancia (<if_matched_sid>): Está escuchando constantemente lo que hace la regla intermedia (100001), que es la que procesa los bloqueos individuales en silencio.
+  * **Vigilancia (<if_matched_sid>):** Está escuchando constantemente lo que hace la regla intermedia (100001), que es la que procesa los bloqueos individuales en silencio.
 
-  * ** Control por IP (<same_source_ip />): Comprueba que los bloqueos vengan de la misma máquina. Si vinieran de IPs distintas, no saltaría la alerta.
+  * **Control por IP (<same_source_ip />):** Comprueba que los bloqueos vengan de la misma máquina. Si vinieran de IPs distintas, no saltaría la alerta.
 
-  * ** Cálculo del ataque (frequency="18" timeframe="45"): Si una misma IP genera 18 o más bloqueos en una ventana de 45 segundos, el SIEM entiende que no es un fallo de conexión normal, sino un escaneo de puertos o un ataque automatizado, y eleva la alerta a Nivel 10 (Crítico).
+  * **Cálculo del ataque (frequency="18" timeframe="45"):** Si una misma IP genera 18 o más bloqueos en una ventana de 45 segundos, el SIEM entiende que no es un fallo de conexión normal, sino un escaneo de puertos o un ataque automatizado, y eleva la alerta a Nivel 10 (Crítico).
 
-  * ** Anti-spam (ignore="240"): Cuando la alerta salta en el Dashboard, la regla se "duerme" durante 4 minutos (240 segundos) para esa IP atacante. Así, si el escaneo de Kali sigue lanzando miles de paquetes, el servidor no se satura guardando la misma alerta una y otra vez, evitando llenar el disco duro y facilitando la lectura al analista.
+  * **Anti-spam (ignore="240"):** Cuando la alerta salta en el Dashboard, la regla se "duerme" durante 4 minutos (240 segundos) para esa IP atacante. Así, si el escaneo de Kali sigue lanzando miles de paquetes, el servidor no se satura guardando la misma alerta una y otra vez, evitando llenar el disco duro y facilitando la lectura al analista.
 
-## 🔄 Flujo de Validación y Prueba de Concepto (PoC)
+##  Flujo de Validación y Prueba de Concepto (PoC)
 
 Para auditar la robustez de la infraestructura y certificar el correcto funcionamiento del pipeline de telemetría y las rules de correlación, se ejecutó una simulación de ataque real siguiendo un flujo cronológico:
 
-* ** 1. Fase de Ataque (Reconocimiento Activo)
+## 1. Fase de Ataque (Reconocimiento Activo)
 
 Desde la máquina de auditoría Kali Linux (10.0.10.135), se lanzó un reconocimiento agresivo temporizado en modo insano (-T5) apuntando a la totalidad de los 65.535 puertos del cortafuegos para forzar una respuesta masiva del perímetro:
 
@@ -146,7 +146,7 @@ Como configuramos la directiva no_log, todos estos miles de impactos que veis en
 
 Al meterle las etiquetas de seguridad en nuestro archivo de reglas, el incidente aparece ya masticado en el panel principal, clasificando el escaneo directamente dentro del mapa de MITRE ATT&CK bajo la técnica de Brute Force (Fuerza Bruta / Reconocimiento):
 
-![Threat](Dashboard_threat_hunting.png)
+![panel](Dashboard_threat_hunting.png)
 
 Además, en la gráfica de la izquierda se pueden ver perfectamente los picos de actividad que coinciden con los momentos exactos en los que lanzamos los comandos de nmap desde la máquina atacante. De esta forma, el analista del SOC puede ver el ataque de forma muy visual sin tener que estar leyendo miles de líneas de logs crudos.
 
@@ -167,11 +167,11 @@ Como la interfaz WAN de mi cortafuegos está conectada al router de la vivienda,
 ![Métricas Globales de Carga de Tráfico y Puertos](dashboard_principal.png)
 
 
-## 📚 Referencias y Créditos
+##  Referencias y Créditos
 
-  * ** Diseño del Parser Base: La estructura inicial de las expresiones regulares para las tramas de OPNsense se adaptó y optimizó a partir de esquemas de código abierto compartidos por la comunidad de seguridad de Wazuh.
+  *  Diseño del Parser Base: La estructura inicial de las expresiones regulares para las tramas de OPNsense se adaptó y optimizó a partir de esquemas de código abierto compartidos por la comunidad de seguridad de Wazuh.
 
-  * ** Documentación Oficial: Consulta de sintaxis de directivas XML mediante la Guía de Usuario de Wazuh.
+  *  Documentación Oficial: Consulta de sintaxis de directivas XML mediante la Guía de Usuario de Wazuh.
 
 
 ---
