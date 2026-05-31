@@ -48,7 +48,7 @@ Debido a que los logs crudos del daemon `filterlog` de OPNsense viajan en format
   <order>srcport,dstport</order>
 </decoder>
 ```
-2. Cómo funciona el decodificador principal (opn-filter)
+## 2. Cómo funciona el decodificador principal (opn-filter)
 
 Este es el decodificador "padre". Su único trabajo es vigilar todos los logs que entran a Wazuh y cazar únicamente los que vienen del cortafuegos OPNsense:
 
