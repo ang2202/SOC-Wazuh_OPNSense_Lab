@@ -146,8 +146,7 @@ Como configuramos la directiva no_log, todos estos miles de impactos que veis en
 
 Al meterle las etiquetas de seguridad en nuestro archivo de reglas, el incidente aparece ya masticado en el panel principal, clasificando el escaneo directamente dentro del mapa de MITRE ATT&CK bajo la técnica de Brute Force (Fuerza Bruta / Reconocimiento):
 
-
-![introduce imagen](dashboard_threat_hunting.png)
+![introduce imagen](otro_dashboard.png)
 
 Además, en la gráfica de la izquierda se pueden ver perfectamente los picos de actividad que coinciden con los momentos exactos en los que lanzamos los comandos de nmap desde la máquina atacante. De esta forma, el analista del SOC puede ver el ataque de forma muy visual sin tener que estar leyendo miles de líneas de logs crudos.
 
@@ -159,7 +158,7 @@ Mientras dejé el laboratorio encendido en modo de escucha pasiva, noté que la 
 
 Al revisar el detalle de la alerta, vi que este dispositivo estaba inundando la red con paquetes dirigidos al puerto **5353**:
 
-![Estructura JSON](detalles_alerta.png)
+![estructura ](detalles_jeje.png)
 
 **¿Qué estaba pasando realmente?** Este tráfico es totalmente normal en redes domésticas; es el protocolo **mDNS**, el que usan los móviles, teles inteligentes o impresoras para buscarse entre sí automáticamente dentro de casa. 
 
