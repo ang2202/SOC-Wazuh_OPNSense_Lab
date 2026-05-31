@@ -159,7 +159,7 @@ Mientras dejé el laboratorio encendido en modo de escucha pasiva, noté que la 
 
 Al revisar el detalle de la alerta, vi que este dispositivo estaba inundando la red con paquetes dirigidos al puerto **5353**:
 
-![Estructura JSON del Log de Bloqueo mDNS](detalles_alerta.png)
+![Estructura JSON](detalles_alerta.png)
 
 **¿Qué estaba pasando realmente?** Este tráfico es totalmente normal en redes domésticas; es el protocolo **mDNS**, el que usan los móviles, teles inteligentes o impresoras para buscarse entre sí automáticamente dentro de casa. 
 
