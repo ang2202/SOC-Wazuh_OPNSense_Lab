@@ -169,7 +169,7 @@ Como la interfaz WAN de mi cortafuegos está conectada al router de la vivienda,
 
 ##  Referencias y Créditos
 
-  *  Diseño del Parser Base: La estructura inicial de las expresiones regulares para las tramas de OPNsense se adaptó y optimizó a partir de esquemas de código abierto compartidos por la comunidad de seguridad de Wazuh.
+  *  Diseño del ruleset: La estructura inicial de las expresiones regulares para las tramas de OPNsense se adaptó y optimizó a partir de esquemas de código abierto compartidos por la comunidad de seguridad de Wazuh.
 
   *  Documentación Oficial: Consulta de sintaxis de directivas XML mediante la Guía de Usuario de Wazuh.
 
