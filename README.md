@@ -146,10 +146,8 @@ Como configuramos la directiva no_log, todos estos miles de impactos que veis en
 
 Al meterle las etiquetas de seguridad en nuestro archivo de reglas, el incidente aparece ya masticado en el panel principal, clasificando el escaneo directamente dentro del mapa de MITRE ATT&CK bajo la técnica de Brute Force (Fuerza Bruta / Reconocimiento):
 
-´´´
-![panel](Dashboard_threat_hunting.png)
 
-´´´
+![panel](Dashboard_threat_hunting.png)
 
 Además, en la gráfica de la izquierda se pueden ver perfectamente los picos de actividad que coinciden con los momentos exactos en los que lanzamos los comandos de nmap desde la máquina atacante. De esta forma, el analista del SOC puede ver el ataque de forma muy visual sin tener que estar leyendo miles de líneas de logs crudos.
 
