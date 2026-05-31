@@ -125,7 +125,7 @@ sudo nmap -T5 -p- --open 192.168.1.140
 ```
 Se adjunta la evidencia de la ejecución del comando ofensivo en la terminal del atacante:
 
-![comando ofensivo] (nmap_1_kali.png)
+![comando ofensivo](nmap_1_kali.png)
 
 
 ## 2. Qué pasa dentro de Wazuh cuando llega el ataque
@@ -134,22 +134,27 @@ Cuando la Kali empieza a escanear a lo loco, el OPNsense no para de bloquear paq
 
 Aquí es donde se nota el trabajo de optimización que hicimos con las reglas. En esta captura de pantalla de la sección de Threat Hunting se puede ver perfectamente la "cola" o fila india de logs que van entrando. Todos entran con la regla intermedia (100001) y con Nivel 5 de severidad:
 
+![fila india](cola_masiva.png)
+
 Como configuramos la directiva no_log, todos estos miles de impactos que veis en la fila se procesan directamente en la memoria del servidor. No se escriben en el disco duro para no llenarlo de basura ni saturar la base de datos con alertas repetidas de "paquete bloqueado".
 
 ## 3. El resultado final en el Dashboard del SOC
 
 ¿Cuándo vemos el aviso real? En cuanto el motor de Wazuh cuenta que una misma IP de origen (nuestra Kali) ha generado más de 18 bloqueos en menos de 45 segundos, la regla de correlación (100002) se activa automáticamente y salta la alerta gorda de Nivel 10 (Crítica).
 
+![alerta](alerta_masiva.png)
+
 Al meterle las etiquetas de seguridad en nuestro archivo de reglas, el incidente aparece ya masticado en el panel principal, clasificando el escaneo directamente dentro del mapa de MITRE ATT&CK bajo la técnica de Brute Force (Fuerza Bruta / Reconocimiento):
 
-Además, en la gráfica de la izquierda se pueden ver perfectamente los picos de actividad que coinciden con los momentos exactos en los que lanzamos los comandos de nmap desde la máquina atacante. De esta forma, el analista del SOC puede ver el ataque de forma muy visual sin tener que estar leyendo miles de líneas de logs crudos.
+![Threat](Dashboard_threat_hunting.png)
 
+Además, en la gráfica de la izquierda se pueden ver perfectamente los picos de actividad que coinciden con los momentos exactos en los que lanzamos los comandos de nmap desde la máquina atacante. De esta forma, el analista del SOC puede ver el ataque de forma muy visual sin tener que estar leyendo miles de líneas de logs crudos.
 
 ## 🔍 Extra: El caso del tráfico mDNS (Ruido en la red de casa)
 
 Mientras dejé el laboratorio encendido en modo de escucha pasiva, noté que la regla de ráfagas (`100002`) empezó a registrar picos de actividad extraños que no venían de la máquina de Kali Linux, sino de un dispositivo físico de mi propia casa (con la IP **`192.168.1.81`**):
 
-![Alerta de Evento Masivo desde Red Externa](alerta%20masiva.jpg)
+![Alerta de Evento Masivo desde Red Externa](alerta_masiva.png)
 
 Al revisar el detalle de la alerta, vi que este dispositivo estaba inundando la red con paquetes dirigidos al puerto **5353**:
 
@@ -159,7 +164,7 @@ Al revisar el detalle de la alerta, vi que este dispositivo estaba inundando la 
 
 Como la interfaz WAN de mi cortafuegos está conectada al router de la vivienda, el OPNsense interceptó ese "ruido" de fondo, lo bloqueó por seguridad y se lo envió a Wazuh. Esto me sirvió como una prueba real perfecta para ver cómo el SIEM procesa el tráfico del día a día y cómo lo organiza visualmente en las gráficas de puertos más activos:
 
-![Métricas Globales de Carga de Tráfico y Puertos](dashboard%20principal.png)
+![Métricas Globales de Carga de Tráfico y Puertos](dashboard_principal.png)
 
 
 ## 📚 Referencias y Créditos
